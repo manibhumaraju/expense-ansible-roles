@@ -1,3 +1,69 @@
+# - name: disable default nodejs
+#   ansible.builtin.command: dnf module disable nodejs -y
+
+# - name: enable nodejs 20
+#   ansible.builtin.command: dnf module enable nodejs:20 -y
+
+# - name: install nodejs and mysql  
+#   ansible.builtin.package: 
+#       name: "{{ item }}"
+#       state: present
+#   loop:
+#   - nodejs
+#   - mysql
+
+# - name: creating expense user
+#   ansible.builtin.user:
+#       name: expense
+
+# - name: create app directory
+#   ansible.builtin.file:
+#     path: /app
+#     state: directory
+
+# - name: download the backend code
+#   ansible.builtin.get_url: 
+#     url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+#     dest: /tmp/backend.zip
+
+# - name: extract the code
+#   ansible.builtin.unarchive:
+#     src: /tmp/backend.zip  #by default ansible thinks this is in ansible server
+#     dest: /app
+#     remote_src: yes
+
+# - name: install the dependencies
+#   ansible.builtin.command: npm install
+#   args:
+#       chdir: /app
+
+# - name: copy backend service
+#   ansible.builtin.template:
+#       src: backend.service.j2
+#       dest: /etc/systemd/system/backend.service
+
+# - name: ansible to install pymysql
+#   ansible.builtin.pip:
+#     name: 
+#     - PyMySQL
+#     - cryptography    #for handilin error for importing data by multiple times
+#     executable: pip3.9
+
+# - name: import mysql data
+#   community.mysql.mysql_db:
+#       login_user: root
+#       login_password: "{{ mysql_root_password }}"
+#       login_host: "{{ login_host }}"
+#       target: /app/schema/backend.sql
+#       name: all
+#       state: import
+      
+# - name: demon reload
+#   ansible.builtin.systemd_service:
+#       state: restarted 
+#       name: backend 
+
+
 - name: disable default nodejs
   ansible.builtin.command: dnf module disable nodejs -y
 
@@ -10,7 +76,13 @@
       state: present
   loop:
   - nodejs
-  - mysql
+  - mysql-server  # Install MySQL server
+
+- name: start and enable mysql service
+  ansible.builtin.systemd:
+    name: mysqld
+    state: started
+    enabled: yes
 
 - name: creating expense user
   ansible.builtin.user:
@@ -28,7 +100,7 @@
 
 - name: extract the code
   ansible.builtin.unarchive:
-    src: /tmp/backend.zip  #by default ansible thinks this is in ansible server
+    src: /tmp/backend.zip
     dest: /app
     remote_src: yes
 
@@ -42,11 +114,11 @@
       src: backend.service.j2
       dest: /etc/systemd/system/backend.service
 
-- name: ansible to install pymysql
+- name: install pymysql
   ansible.builtin.pip:
     name: 
     - PyMySQL
-    - cryptography    #for handilin error for importing data by multiple times
+    - cryptography
     executable: pip3.9
 
 - name: import mysql data
@@ -58,7 +130,7 @@
       name: all
       state: import
       
-- name: demon reload
-  ansible.builtin.systemd_service:
-      state: restarted 
-      name: backend 
+- name: reload systemd
+  ansible.builtin.systemd:
+    name: backend
+    state: reloaded
