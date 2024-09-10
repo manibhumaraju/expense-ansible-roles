@@ -33,7 +33,7 @@
 - name: copy expense conf
   ansible.builtin.copy:
       src: expense.conf
-      dest: /etc/nginx/default.d/expense.conf
+      dest: /etc/nginx/default.d/expense.conf.j2
 
 - name: restsart nginx
   ansible.builtin.service:
