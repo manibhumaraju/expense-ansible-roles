@@ -1,6 +1,9 @@
 - name: nginx install and run
   hosts: all
   become: yes  #take sudo access
+  vars_files:
+  - 
+
   tasks:
   - name: install nginx
     ansible.builtin.package: #heterogenous module that can work for all distributors
