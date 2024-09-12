@@ -1,7 +1,7 @@
 - name: nginx install and run
   hosts: all
   become: yes  #take sudo access
-  vars_files:
+  # vars_files:
   # - /var/expense/credentials_03-nginx.yaml
 
   tasks:
